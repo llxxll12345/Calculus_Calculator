@@ -275,7 +275,6 @@ public class parser {
         if (firstDerivativeX != null) secondDerivativeXY = Derivative.computeDerivative("y", firstDerivativeX);
         if (secondDerivativeXY != null) {
             secondDerivativeXY = ExpressionTree.simplifyExpression(secondDerivativeXY);
-            //f.printByLevel();
             result.add("Mixed second derivative d(d/dx)/dy\n" + Derivative.compute(secondDerivativeXY));
             System.out.println("Mixed second derivative d(d/dx)/dy\n" + Derivative.compute(secondDerivativeXY));
         }
@@ -284,7 +283,6 @@ public class parser {
         if (secondDerivativeXX != null) thirdDerivativeXXX = Derivative.computeDerivative("x", secondDerivativeXX);
         if (thirdDerivativeXXX != null) {
             thirdDerivativeXXX = ExpressionTree.simplifyExpression(thirdDerivativeXXX);
-            //f.printByLevel();
             System.out.println("\nThird derivative d(d(d/dx)/dx)/dx\n" + Derivative.compute(thirdDerivativeXXX));
         }
 
