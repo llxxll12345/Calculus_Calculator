@@ -1,6 +1,9 @@
 /**
  * Created by llxxll on 1/24/2018.
  */
+import com.sun.xml.internal.bind.v2.util.QNameMap;
+import javafx.util.Pair;
+
 import java.util.*;
 
 public class parser {
@@ -213,9 +216,49 @@ public class parser {
         for (String str : list) strB.append(str + " ");
         System.out.println(strB.toString());
     }
+    public String getResults(ExpNode exprTree) {
+        String ret = "";
+        ArrayList<String> var = new ArrayList<>();
+        ArrayList<Double> values = new ArrayList<>();
+        for(Map.Entry<String, Double> vars: valueList.entrySet()) {
+            var.add(vars.getKey());
+            values.add(vars.getValue());
+        }
+        Derivative.setVars(var);
+        Derivative.setValues(values);
 
-    public static ArrayList<String> derivativeExample(ExpNode ExpressionTree) {
-        //define variables that will be used
+        ExpNode f = exprTree.simplifyExpression(exprTree);
+        ret += "\n Function : \n" + deparse(f) + "\n Result of Evaluation: \n" + Derivative.compute(f);
+
+        ExpNode firstDex = Derivative.computeDerivative("x", f);
+        ret += resComps(firstDex, "First Order Derivative df/dx: ");
+
+        ExpNode firstDey = Derivative.computeDerivative("y", f);
+        ret += resComps(firstDey, "First Order Derivative df/dy: ");
+
+        ExpNode secondDex = Derivative.computeDerivative("x", firstDex);
+        ret += resComps(secondDex, "Second Order Derivative d(df/dx)/dx: ");
+
+        ExpNode secondDey = Derivative.computeDerivative("y", firstDey);
+        ret += resComps(secondDey, "Second Order Derivative d(df/dy)/dy: ");
+
+        ExpNode Dxy = Derivative.computeDerivative("y", firstDex);
+        ret += resComps(Dxy, "Second Order Derivative d(df/dx)/dy: ");
+        return ret;
+    }
+
+    public String resComps(ExpNode exprTree, String annotation) {
+        String ret = "";
+        if (exprTree != null) {
+            ret += "\n" + annotation + "\n ";
+            ret += " Expr: " + deparse(exprTree) + "\n";
+            System.out.println("Deparse: " + deparse(exprTree) + "\n");
+            ret += " Numerical Value: " + Derivative.compute(exprTree);
+        }
+        return ret;
+    }
+
+    public String derivativeExample(ExpNode ExpressionTree) {
         ArrayList<String> result = new ArrayList<>();
         ArrayList<String> variables = new ArrayList<>();
         ArrayList<Double> values = new ArrayList<>();
@@ -223,32 +266,26 @@ public class parser {
         variables.add("x");
         values.add(5.0);
         variables.add("y");
-        //machine that handles computations
         Derivative.setVars(variables);
         Derivative.setValues(values);
 
         ExpNode f = ExpressionTree;
-        //simplyfing the expression
         f = ExpressionTree.simplifyExpression(f);
-        //printing the expression tree, by level
-        //f.printByLevel();
-        //f evaluated at specified point
+
         result.add("Function evaluated:\n" + Derivative.compute(f) + "\n");
         System.out.println("Function evaluated:\n" + Derivative.compute(f) + "\n");
-        //computing the first derivative od f, with respect to x
         ExpNode firstDerivativeX = Derivative.computeDerivative("x", f);
         if (firstDerivativeX != null) {
             firstDerivativeX = ExpressionTree.simplifyExpression(firstDerivativeX);
-            //f.printByLevel();
             result.add("First derivative d/dx\n" + Derivative.compute(firstDerivativeX) + "\n");
-            System.out.println("First derivative d/dx\n" + Derivative.compute(firstDerivativeX) + "\n");
+            System.out.println("First derivative d/dx: \n" + deparse(firstDerivativeX) + "\n" + Derivative.compute(firstDerivativeX) + "\n");
         }
-        //computing the first derivative od f, with respect to x
+
         ExpNode firstDerivativeY = Derivative.computeDerivative("y", f);
         if (firstDerivativeY != null) {
             firstDerivativeY = ExpressionTree.simplifyExpression(firstDerivativeY);
             //f.printByLevel();
-            result.add("First derivative d/dy\n" + Derivative.compute(firstDerivativeY) + "\n");
+            result.add("First derivative d/dy: \n" + deparse(firstDerivativeX) + "\n" + Derivative.compute(firstDerivativeY) + "\n");
             System.out.println("First derivative d/dy\n" + Derivative.compute(firstDerivativeY) + "\n");
         }
 
@@ -265,7 +302,6 @@ public class parser {
         if (firstDerivativeY != null) secondDerivativeYY = Derivative.computeDerivative("y", firstDerivativeY);
         if (secondDerivativeYY != null) {
             secondDerivativeYY = ExpressionTree.simplifyExpression(secondDerivativeYY);
-            //secondDerivativeYY.printByLevel();
             result.add("Second derivative d(d/dy)/dy\n" + Derivative.compute(secondDerivativeYY) + "\n");
             System.out.println("Second derivative d(d/dy)/dy\n" + Derivative.compute(secondDerivativeYY) + "\n");
         }
@@ -294,7 +330,10 @@ public class parser {
             System.out.println("\nThird derivative d(d(d/dy)/dy)/dy\n" + Derivative.compute(thirdDerivativeYYY));
         }
 
-        return result;
+        String ret = "";
+        for (String str: result)
+            ret += str;
+        return ret;
     }
 
     public static void main(String[] args) {
